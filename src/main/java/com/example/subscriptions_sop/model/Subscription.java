@@ -15,7 +15,7 @@ public class Subscription extends BaseEntity {
     private SubscriptionTier tier;
     private LocalDateTime subscriptionStartTime;
     private LocalDateTime subscriptionEndTime;
-    private boolean isActive;
+    private boolean isActive = true;
     private Double price;
 
     @ManyToOne

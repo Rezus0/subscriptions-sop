@@ -12,9 +12,9 @@ import java.util.Set;
 public class Channel extends BaseEntity {
     private User owner;
     private Set<Subscription> subscriptions;
-    private boolean isOnline;
+    private boolean isOnline = false;
     private String description;
-    private Set<String> links;
+    private Set<String> mediaLinks;
 
     @OneToOne
     @JoinColumn(name = "owner_id")
@@ -43,8 +43,8 @@ public class Channel extends BaseEntity {
     @ElementCollection
     @CollectionTable(name = "channel_links", joinColumns = @JoinColumn(name = "channel_id"))
     @NotNull(message = "Links can't be null")
-    public Set<String> getLinks() {
-        return links;
+    public Set<String> getMediaLinks() {
+        return mediaLinks;
     }
 
     public void setOwner(User owner) {
@@ -63,7 +63,7 @@ public class Channel extends BaseEntity {
         this.description = description;
     }
 
-    public void setLinks(Set<String> links) {
-        this.links = links;
+    public void setMediaLinks(Set<String> links) {
+        this.mediaLinks = links;
     }
 }
