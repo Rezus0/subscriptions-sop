@@ -5,12 +5,13 @@ import com.example.subscriptions_sop.representation_model.ChannelRepresentation;
 import com.example.subscriptions_sop.representation_model.UserRepresentation;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
 
 
 public interface ChannelService {
-    EntityModel<ChannelRepresentation> getChannel(String targetChannelUsername);
+    ChannelRepresentation getChannel(String targetChannelUsername);
     CollectionModel<ChannelRepresentation> getLiveChannels();
-    EntityModel<ChannelRepresentation> updateInfo(ChannelUpdateDto channelUpdateDto);
+    ChannelRepresentation updateInfo(ChannelUpdateDto channelUpdateDto);
     CollectionModel<UserRepresentation> getSubscribers(String targetChannelUsername);
-    EntityModel<ChannelRepresentation> goLive(String targetChannelUsername);
+    ChannelRepresentation goLive(String targetChannelUsername);
 }

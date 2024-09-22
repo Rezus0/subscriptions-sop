@@ -13,7 +13,7 @@ public abstract class BaseEntity {
     private LocalDateTime updated;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID, generator = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     public UUID getId() {
         return id;
     }

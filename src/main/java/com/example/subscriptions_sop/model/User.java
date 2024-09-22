@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -13,8 +14,14 @@ public class User extends BaseEntity {
     private String username;
     private String password;
     private Channel channel;
-    private Double balance;
-    private Set<Subscription> subscriptions;
+    private Double balance = 0D;
+    private Set<Subscription> subscriptions = new HashSet<>();
+
+    public void addToBalance(Double amount) {
+        if (amount <= 0)
+            throw new IllegalArgumentException("Deposit amount must be positive number");
+        this.balance += amount;
+    }
 
     @NotBlank(message = "Username can't be blank")
     public String getUsername() {
@@ -26,7 +33,7 @@ public class User extends BaseEntity {
         return password;
     }
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "channel_id")
     public Channel getChannel() {
         return channel;

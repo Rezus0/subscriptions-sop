@@ -6,11 +6,12 @@ import com.example.subscriptions_sop.representation_model.ChannelRepresentation;
 import com.example.subscriptions_sop.representation_model.UserRepresentation;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
 
 public interface UserService {
-    EntityModel<UserRepresentation> getUser(String username);
-    EntityModel<UserRepresentation> register(UserRegDto userRegDto);
-    EntityModel<UserRepresentation> update(UserRegDto userRegDto);
-    EntityModel<UserRepresentation> deposit(UserDepositDto userDepositDto);
+    UserRepresentation getUser(String username);
+    UserRepresentation register(UserRegDto userRegDto);
+    UserRepresentation update(UserRegDto userRegDto);
+    UserRepresentation deposit(UserDepositDto userDepositDto);
     CollectionModel<ChannelRepresentation> getSubscribedChannels(String subscriberUsername);
 }

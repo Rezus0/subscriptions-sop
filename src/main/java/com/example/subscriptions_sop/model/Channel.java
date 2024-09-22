@@ -5,18 +5,30 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.BatchSize;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "channels")
 public class Channel extends BaseEntity {
     private User owner;
-    private Set<Subscription> subscriptions;
+    private Set<Subscription> subscriptions = new HashSet<>();
     private boolean isOnline = false;
     private String description;
-    private Set<String> mediaLinks;
+    private Set<String> mediaLinks = new HashSet<>();
 
-    @OneToOne
+    public Channel(User owner, String description) {
+        this.setCreated(LocalDateTime.now());
+        this.setUpdated(LocalDateTime.now());
+        this.owner = owner;
+        this.description = description;
+    }
+
+    public Channel() {
+    }
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "owner_id")
     @NotNull(message = "Owner can't be null")
     public User getOwner() {
@@ -35,7 +47,7 @@ public class Channel extends BaseEntity {
         return isOnline;
     }
 
-    @NotBlank(message = "Description can't be blank")
+    @NotNull(message = "Description can't be null")
     public String getDescription() {
         return description;
     }
