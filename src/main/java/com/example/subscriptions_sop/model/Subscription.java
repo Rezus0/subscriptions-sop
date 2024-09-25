@@ -18,6 +18,16 @@ public class Subscription extends BaseEntity {
     private boolean isActive = true;
     private Double price;
 
+    public Subscription() {
+    }
+
+    public Subscription(User subscriber, Channel targetChannel, SubscriptionTier tier, Double price) {
+        this.subscriber = subscriber;
+        this.targetChannel = targetChannel;
+        this.tier = tier;
+        this.price = price;
+    }
+
     @ManyToOne
     @JoinColumn(name = "subscriber_id")
     @NotNull(message = "Subscriber can't be null")

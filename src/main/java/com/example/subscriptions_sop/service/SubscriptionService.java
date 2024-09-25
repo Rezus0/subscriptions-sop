@@ -10,9 +10,10 @@ import org.springframework.hateoas.RepresentationModel;
 
 public interface SubscriptionService {
     CollectionModel<SubscriptionRepresentation> getSubscriptionsHistory(String subscriberUsername,
-                                                                 String targetChannelUsername);
-    CollectionModel<SubscriptionRepresentation> getSubscriptionsForUser(String username);
-    CollectionModel<SubscriptionRepresentation> getSubscriptionsForChannel(String targetChannelUsername);
+                                                                 String targetChannelUsername, int page, int size);
+    CollectionModel<SubscriptionRepresentation> getSubscriptionsForUser(String username, int page, int size);
+    CollectionModel<SubscriptionRepresentation> getSubscriptionsForChannel(String targetChannelUsername,
+                                                                           int page, int size);
     SubscriptionRepresentation subscribe(SubDto subDto);
 
     SubscriptionRepresentation extendSubscription(SubExtendDto subExtendDto);

@@ -20,6 +20,12 @@ public class ChannelController {
         return ResponseEntity.ok(representation);
     }
 
+    @GetMapping("/{username}/channel/live")
+    public ResponseEntity<ChannelRepresentation> goLive(@PathVariable("username") String username) {
+        ChannelRepresentation representation = channelService.goLive(username);
+        return ResponseEntity.ok(representation);
+    }
+
     @Autowired
     public void setChannelService(ChannelService channelService) {
         this.channelService = channelService;

@@ -1,0 +1,5 @@
+TODO:
+* All method implementations
+* Password saving with encoder
+* Actions for HATEOAS
+* add updatedTime for each update

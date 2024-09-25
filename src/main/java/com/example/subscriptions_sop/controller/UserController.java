@@ -1,5 +1,6 @@
 package com.example.subscriptions_sop.controller;
 
+import com.example.subscriptions_sop.dto.UserDepositDto;
 import com.example.subscriptions_sop.dto.UserRegDto;
 import com.example.subscriptions_sop.representation_model.UserRepresentation;
 import com.example.subscriptions_sop.service.UserService;
@@ -28,6 +29,12 @@ public class UserController {
     public ResponseEntity<UserRepresentation> register(@RequestBody UserRegDto userRegDto) {
         UserRepresentation representation = userService.register(userRegDto);
         return ResponseEntity.created(URI.create(urlBase + representation.getUsername())).body(representation);
+    }
+
+    @PatchMapping("/user/deposit")
+    public ResponseEntity<UserRepresentation> deposit(@RequestBody UserDepositDto userDepositDto) {
+        UserRepresentation representation = userService.deposit(userDepositDto);
+        return ResponseEntity.ok(representation);
     }
 
     @Autowired

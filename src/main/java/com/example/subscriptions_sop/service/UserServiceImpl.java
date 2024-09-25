@@ -1,5 +1,8 @@
 package com.example.subscriptions_sop.service;
 
+import com.example.subscriptions_sop.controller.ChannelController;
+import com.example.subscriptions_sop.controller.SubscriptionController;
+import com.example.subscriptions_sop.controller.UserController;
 import com.example.subscriptions_sop.dto.UserDepositDto;
 import com.example.subscriptions_sop.dto.UserRegDto;
 import com.example.subscriptions_sop.exceptions.UserAlreadyExistException;
@@ -20,15 +23,15 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @Service
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
     private ChannelRepository channelRepository;
     private final ModelMapper modelMapper;
-
-    @Value("${app.url.base}")
-    private String urlBase;
 
     public UserServiceImpl(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
@@ -89,9 +92,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserRepresentation addLinks(String username, UserRepresentation userRepresentation) {
-        userRepresentation.add(Link.of(urlBase + username).withSelfRel())
-                .add(Link.of(urlBase + username + "/channel").withRel("channel"))
-                .add(Link.of(urlBase + username + "/subscriptions").withRel("subscriptions"));
+        Link selfLink = linkTo(methodOn(UserController.class).getUser(username)).withSelfRel();
+        Link channelLink = linkTo(methodOn(ChannelController.class).getChannel(username)).withRel("channel");
+        Link subsLink = linkTo(methodOn(SubscriptionController.class).getSubscriptionsForUser(
+                username, 1, 5
+        )).withRel("subscriptions");
+        userRepresentation.add(selfLink).add(channelLink).add(subsLink);
         return userRepresentation;
     }
 
