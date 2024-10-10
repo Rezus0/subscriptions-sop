@@ -1,0 +1,20 @@
+type Query {
+    channel(username: String!): Channel!
+}
+
+type Mutation {
+    goLive(targetChannelUsername: String!): Channel!
+}
+
+type Channel {
+    owner: User
+    subscriptions: [Subscription]
+    isOnline: Boolean
+    description: String
+    mediaLinks: [String]
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}

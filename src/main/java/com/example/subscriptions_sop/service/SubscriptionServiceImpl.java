@@ -83,6 +83,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public Iterable<Subscription> getSubscriptionsDataForHistory(String subscriberUsername, String targetChannelUsername) {
+        return subscriptionRepository.findBySubscriberUsernameAndTargetChannelOwnerUsername(
+                subscriberUsername, targetChannelUsername
+        );
+    }
+
+    @Override
     public CollectionModel<SubscriptionRepresentation> getSubscriptionsForUser(String username, int page, int size) {
         int elementsCount = subscriptionRepository.findBySubscriberUsername(username).size();
         int totalPages = checkPages(page, size, elementsCount);
@@ -108,6 +115,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             collectionModel.add(nextLink);
         }
         return collectionModel;
+    }
+
+    @Override
+    public Iterable<Subscription> getSubscriptionsDataForUser(String username) {
+        return subscriptionRepository.findBySubscriberUsername(username);
     }
 
     @Override
@@ -139,6 +151,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return collectionModel;
     }
 
+    @Override
+    public Iterable<Subscription> getSubscriptionsDataForChannel(String targetChannelUsername) {
+        return subscriptionRepository.findByTargetChannelOwnerUsername(targetChannelUsername);
+    }
+
     private int checkPages(int page, int size, long elementsCount) {
         if (size <= 0 || size > 50) {
             throw new IllegalArgumentException(
@@ -146,6 +163,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             );
         }
         int totalPages = (int) elementsCount / size + (elementsCount % size == 0 ? 0 : 1);
+        if (totalPages == 0)
+            totalPages = 1;
         if (page > totalPages || page <= 0) {
             throw new IllegalArgumentException(
                     String.format("Page number: %d is incorrect, current available number of pages: 1-%d",
@@ -158,6 +177,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     @Override
     public SubscriptionRepresentation subscribe(SubDto subDto) {
+        Subscription subscription = getSubscriptionDataForSubscribe(subDto);
+        SubscriptionRepresentation representation = modelMapper.map(
+                subscription, SubscriptionRepresentation.class
+        );
+        addLinks(subscription, representation);
+        return representation;
+    }
+
+    @Override
+    public Subscription getSubscriptionDataForSubscribe(SubDto subDto) {
         String subscriberUsername = subDto.getSubscriberUsername();
         String targetChannelUsername = subDto.getTargetChannelUsername();
         if (subscriberUsername.equals(targetChannelUsername))
@@ -183,17 +212,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription.setSubscriptionStartTime(LocalDateTime.now());
         subscription.setSubscriptionEndTime(LocalDateTime.now().plusMonths(subDto.getDurationInMonths()));
         user.setBalance(userBalance - subscriptionTotalPrice);
-        SubscriptionRepresentation representation = modelMapper.map(
-                subscriptionRepository.saveAndFlush(subscription), SubscriptionRepresentation.class
-        );
         userRepository.saveAndFlush(user);
-        addLinks(subscription, representation);
-        return representation;
+        return subscriptionRepository.saveAndFlush(subscription);
     }
 
     @Transactional
     @Override
     public SubscriptionRepresentation extendSubscription(SubExtendDto subExtendDto) {
+        Subscription subscription = getSubscriptionDataForExtend(subExtendDto);
+        SubscriptionRepresentation representation = modelMapper.map(
+                subscription, SubscriptionRepresentation.class
+        );
+        addLinks(subscription, representation);
+        return representation;
+    }
+
+    @Override
+    public Subscription getSubscriptionDataForExtend(SubExtendDto subExtendDto) {
         String subscriberUsername = subExtendDto.getSubscriberUsername();
         String targetChannelUsername = subExtendDto.getTargetChannelUsername();
         Optional<Subscription> activeSubscription = getActiveSubscription(subscriberUsername, targetChannelUsername);
@@ -210,12 +245,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new SubscriptionException("You don't have enough credits");
         subscription.setSubscriptionEndTime(subscription.getSubscriptionEndTime().plusMonths(subExtendDto.getDurationInMonths()));
         user.setBalance(userBalance - subscriptionPrice);
-        SubscriptionRepresentation representation = modelMapper.map(
-                subscriptionRepository.saveAndFlush(subscription), SubscriptionRepresentation.class
-        );
         userRepository.saveAndFlush(user);
-        addLinks(subscription, representation);
-        return representation;
+        return subscriptionRepository.saveAndFlush(subscription);
     }
 
     private User getAndCheckUser(String username) {
@@ -240,22 +271,38 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public SubscriptionRepresentation cancelSubscription(String subscriberUsername, String targetChannelUsername) {
+        Subscription subscription = getSubscriptionDataForCancel(subscriberUsername, targetChannelUsername);
+        SubscriptionRepresentation representation = modelMapper.map(
+                subscription, SubscriptionRepresentation.class
+        );
+        addLinks(subscriberUsername, targetChannelUsername, representation);
+        return representation;
+    }
+
+    @Override
+    public Subscription getSubscriptionDataForCancel(String subscriberUsername, String targetChannelUsername) {
         Optional<Subscription> activeSubscription = getActiveSubscription(subscriberUsername, targetChannelUsername);
         if (activeSubscription.isEmpty())
             throw new SubscriptionException("You don't have any active subscription, try to subscribe");
         Subscription subscription = activeSubscription.get();
         subscription.setSubscriptionEndTime(LocalDateTime.now());
         subscription.setActive(false);
-        SubscriptionRepresentation representation = modelMapper.map(
-                subscriptionRepository.saveAndFlush(subscription), SubscriptionRepresentation.class
-        );
-        addLinks(subscriberUsername, targetChannelUsername, representation);
-        return representation;
+        return subscriptionRepository.saveAndFlush(subscription);
     }
 
     @Transactional
     @Override
     public SubscriptionRepresentation upgradeTier(SubUpgradeDto subUpgradeDto) {
+        Subscription subscription = getSubscriptionDataForUpgrade(subUpgradeDto);
+        SubscriptionRepresentation representation = modelMapper.map(
+                subscription, SubscriptionRepresentation.class
+        );
+        addLinks(subscription, representation);
+        return representation;
+    }
+
+    @Override
+    public Subscription getSubscriptionDataForUpgrade(SubUpgradeDto subUpgradeDto) {
         String subscriberUsername = subUpgradeDto.getSubscriberUsername();
         String targetChannelUsername = subUpgradeDto.getTargetChannelUsername();
         Optional<Subscription> activeSubscription = getActiveSubscription(subscriberUsername, targetChannelUsername);
@@ -280,11 +327,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription.setTier(newTier);
         user.setBalance(userBalance - ((newTier.getValue() - oldTier.getValue()) * 5));
         userRepository.saveAndFlush(user);
-        SubscriptionRepresentation representation = modelMapper.map(
-                subscriptionRepository.saveAndFlush(subscription), SubscriptionRepresentation.class
-        );
-        addLinks(subscription, representation);
-        return representation;
+        return subscriptionRepository.saveAndFlush(subscription);
     }
 
     private CollectionModel<SubscriptionRepresentation> subscriptionsToRepresentations(Page<Subscription> subscriptions) {

@@ -1,0 +1,26 @@
+extend type Query {
+    user(username: String!): User!
+}
+
+extend type Mutation {
+    registerUser(user: UserRegDto!): User!
+    deposit(user: UserDepositDto!): User!
+}
+
+input UserDepositDto {
+    username: String!
+    depositAmount: Float!
+}
+
+input UserRegDto {
+    username: String!
+    password: String!
+}
+
+type User {
+    username: String
+    password: String
+    channel: Channel
+    balance: Float
+    subscriptions: [Subscription]
+}

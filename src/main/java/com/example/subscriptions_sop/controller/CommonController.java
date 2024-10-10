@@ -15,17 +15,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class CommonController {
 
     @GetMapping("/")
-    public ResponseEntity<EntityModel<BaseRepresentation>> getOptions() {
+    public ResponseEntity<BaseRepresentation> getOptions() {
         BaseRepresentation representation = new BaseRepresentation();
-        EntityModel<BaseRepresentation> model = EntityModel.of(representation);
-        model.add(linkTo(methodOn(UserController.class).register(null))
+        representation.add(linkTo(methodOn(UserController.class).register(null))
                 .withRel("register")
                 .withType("POST")
                 .withName("User Register"));
-        model.add(linkTo(methodOn(SubscriptionController.class).subscribe(null))
-                .withRel("subscribe")
-                .withType("POST")
-                .withName("Subscribe"));
-        return ResponseEntity.ok(model);
+        return ResponseEntity.ok(representation);
     }
 }

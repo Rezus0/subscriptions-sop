@@ -16,8 +16,10 @@ import com.example.subscriptions_sop.representation_model.UserRepresentation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty())
             throw new UserNotFoundException("User not found");
-        User user = optionalUser.get();
+        User user = getUserData(username);
         UserRepresentation userRepresentation = modelMapper.map(
                 user,
                 UserRepresentation.class
@@ -52,7 +54,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserData(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty())
+            throw new UserNotFoundException("User not found");
+        return optionalUser.get();
+    }
+
+
+    @Override
     public UserRepresentation register(UserRegDto userRegDto) {
+        User newUser = getUserDataForRegister(userRegDto);
+        UserRepresentation userRepresentation = modelMapper.map(
+                newUser,
+                UserRepresentation.class
+        );
+        addLinks(newUser.getUsername(), userRepresentation);
+        return userRepresentation;
+    }
+
+    @Override
+    public User getUserDataForRegister(UserRegDto userRegDto) {
         if (userRepository.findByUsername(userRegDto.getUsername()).isPresent())
             throw new UserAlreadyExistException("User already exist");
         User newUser = modelMapper.map(userRegDto, User.class);
@@ -60,12 +82,7 @@ public class UserServiceImpl implements UserService {
         newUser.setCreated(LocalDateTime.now());
         newUser.setUpdated(LocalDateTime.now());
         newUser.setChannel(newChannel);
-        UserRepresentation userRepresentation = modelMapper.map(
-                userRepository.saveAndFlush(newUser),
-                UserRepresentation.class
-        );
-        addLinks(newUser.getUsername(), userRepresentation);
-        return userRepresentation;
+        return userRepository.saveAndFlush(newUser);
     }
 
     @Override
@@ -75,16 +92,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserRepresentation deposit(UserDepositDto userDepositDto) {
+        User user = getUserDataForDeposit(userDepositDto);
+        UserRepresentation userRepresentation = modelMapper.map(
+                user, UserRepresentation.class
+        );
+        return addLinks(user.getUsername(), userRepresentation);
+    }
+
+    @Override
+    public User getUserDataForDeposit(UserDepositDto userDepositDto) {
         Optional<User> optionalUser = userRepository.findByUsername(userDepositDto.getUsername());
         if (optionalUser.isEmpty())
             throw new UserNotFoundException("User not found");
         User user = optionalUser.get();
         user.addToBalance(userDepositDto.getDepositAmount());
-        UserRepresentation userRepresentation = modelMapper.map(
-                userRepository.saveAndFlush(user), UserRepresentation.class
-        );
-        return addLinks(user.getUsername(), userRepresentation);
+        return userRepository.saveAndFlush(user);
     }
+
 
     @Override
     public CollectionModel<ChannelRepresentation> getSubscribedChannels(String subscriberUsername) {
@@ -97,7 +121,10 @@ public class UserServiceImpl implements UserService {
         Link subsLink = linkTo(methodOn(SubscriptionController.class).getSubscriptionsForUser(
                 username, 1, 5
         )).withRel("subscriptions");
-        userRepresentation.add(selfLink).add(channelLink).add(subsLink);
+        Link depositLink = linkTo(methodOn(UserController.class).deposit(null)).withRel("deposit")
+                .withName("Deposit")
+                .withType("PATCH");
+        userRepresentation.add(selfLink).add(channelLink).add(subsLink).add(depositLink);
         return userRepresentation;
     }
 

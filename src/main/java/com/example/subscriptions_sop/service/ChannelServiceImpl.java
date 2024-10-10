@@ -32,13 +32,18 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ChannelRepresentation getChannel(String targetChannelUsername) {
-        Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
-        if (optionalChannel.isEmpty())
-            throw new UserNotFoundException("User not found");
-        Channel channel = optionalChannel.get();
+        Channel channel = getChannelData(targetChannelUsername);
         ChannelRepresentation channelRepresentation = modelMapper.map(channel, ChannelRepresentation.class);
         addLinks(channelRepresentation, targetChannelUsername);
         return channelRepresentation;
+    }
+
+    @Override
+    public Channel getChannelData(String targetChannelUsername) {
+        Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
+        if (optionalChannel.isEmpty())
+            throw new UserNotFoundException("User not found");
+        return optionalChannel.get();
     }
 
     @Override
@@ -58,16 +63,21 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ChannelRepresentation goLive(String targetChannelUsername) {
+        Channel channel = getChannelDataForLive(targetChannelUsername);
+        ChannelRepresentation channelRepresentation = modelMapper.map(channel, ChannelRepresentation.class);
+        addLinks(channelRepresentation, targetChannelUsername);
+        return channelRepresentation;
+    }
+
+    @Override
+    public Channel getChannelDataForLive(String targetChannelUsername) {
         Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
         if (optionalChannel.isEmpty())
             throw new UserNotFoundException("User not found");
         Channel channel = optionalChannel.get();
         if (!channel.isOnline())
             channel.setOnline(true);
-        channelRepository.saveAndFlush(channel);
-        ChannelRepresentation channelRepresentation = modelMapper.map(channel, ChannelRepresentation.class);
-        addLinks(channelRepresentation, targetChannelUsername);
-        return channelRepresentation;
+        return channelRepository.saveAndFlush(channel);
     }
 
     private void addLinks(ChannelRepresentation representation, String targetChannelUsername) {

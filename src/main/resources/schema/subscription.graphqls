@@ -1,0 +1,47 @@
+extend type Query {
+    subscriptionsHistory(subscriberUsername: String!, targetChannelUsername: String!): [Subscription]
+    subscriptionsForUser(username: String!): [Subscription]
+    subscriptionsForChannel(targetChannelUsername: String!): [Subscription]
+}
+
+extend type Mutation {
+    subscribe(subscription: SubDto!): Subscription!
+    extendSubscription(subscription: SubExtendDto!): Subscription!
+    cancelSubscription(subscriberUsername: String!, targetChannelUsername: String!): Subscription!
+    upgradeTier(subscription: SubUpgradeDto!): Subscription!
+}
+
+input SubDto {
+    subscriberUsername: String!
+    targetChannelUsername: String!
+    tier: Int!
+    durationInMonths: Int!
+}
+
+input SubUpgradeDto {
+    subscriberUsername: String!
+    targetChannelUsername: String!
+    tier: Int!
+}
+
+input SubExtendDto {
+    subscriberUsername: String!
+    targetChannelUsername: String!
+    durationInMonths: Int!
+}
+
+type Subscription {
+    subscriber: User
+    targetChannel: Channel
+    tier: SubscriptionTier
+    subscriptionStartTime: String
+    subscriptionEndTime: String
+    isActive: Boolean
+    price: Float
+}
+
+enum SubscriptionTier {
+    DEFAULT
+    VIP
+    DELUXE
+}
