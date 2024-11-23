@@ -6,6 +6,7 @@ import com.example.subscriptions_sop.controller.UserController;
 import com.example.subscriptions_sop.dto.ChannelUpdateDto;
 import com.example.subscriptions_sop.exceptions.UserNotFoundException;
 import com.example.subscriptions_sop.model.Channel;
+import com.example.subscriptions_sop.model.User;
 import com.example.subscriptions_sop.repository.ChannelRepository;
 import com.example.subscriptions_sop.representation_model.ChannelRepresentation;
 import com.example.subscriptions_sop.representation_model.UserRepresentation;
@@ -15,6 +16,8 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -57,26 +60,60 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
-    public CollectionModel<UserRepresentation> getSubscribers(String targetChannelUsername) {
+    public CollectionModel<UserRepresentation> getSubscribers(String targetChannelUsername) { //todo доделать
         return null;
     }
 
+    public List<User> getSubscribersWithUsersOutput(String targetChannelUsername) {
+        Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
+        if (optionalChannel.isEmpty())
+            throw new UserNotFoundException("User not found");
+        Channel channel = optionalChannel.get();
+        List<User> subscribers = new ArrayList<>();
+        channel.getSubscriptions().forEach(s -> {
+            if (s.isActive()) {
+                subscribers.add(s.getSubscriber());
+            }
+        });
+        return subscribers;
+    }
+
+
     @Override
     public ChannelRepresentation goLive(String targetChannelUsername) {
-        Channel channel = getChannelDataForLive(targetChannelUsername);
+        Channel channel = goLiveWithChannelOutput(targetChannelUsername);
         ChannelRepresentation channelRepresentation = modelMapper.map(channel, ChannelRepresentation.class);
         addLinks(channelRepresentation, targetChannelUsername);
         return channelRepresentation;
     }
 
     @Override
-    public Channel getChannelDataForLive(String targetChannelUsername) {
+    public Channel goLiveWithChannelOutput(String targetChannelUsername) {
         Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
         if (optionalChannel.isEmpty())
             throw new UserNotFoundException("User not found");
         Channel channel = optionalChannel.get();
         if (!channel.isOnline())
             channel.setOnline(true);
+        return channelRepository.saveAndFlush(channel);
+    }
+
+    @Override
+    public ChannelRepresentation goOffline(String targetChannelUsername) {
+        Channel channel = goOfflineWithChannelOutput(targetChannelUsername);
+        ChannelRepresentation channelRepresentation = modelMapper.map(channel, ChannelRepresentation.class);
+        addLinks(channelRepresentation, targetChannelUsername);
+        return channelRepresentation;
+    }
+
+    @Override
+    public Channel goOfflineWithChannelOutput(String targetChannelUsername) {
+        Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
+        if (optionalChannel.isEmpty())
+            throw new UserNotFoundException("User not found");
+        Channel channel = optionalChannel.get();
+        if (channel.isOnline())
+            channel.setOnline(false);
         return channelRepository.saveAndFlush(channel);
     }
 

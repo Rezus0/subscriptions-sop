@@ -4,6 +4,7 @@ type Query {
 
 type Mutation {
     goLive(targetChannelUsername: String!): Channel!
+    goOffline(targetChannelUsername: String!): Channel!
 }
 
 type Channel {

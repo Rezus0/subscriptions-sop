@@ -16,5 +16,7 @@ public interface ChannelService {
     ChannelRepresentation updateInfo(ChannelUpdateDto channelUpdateDto);
     CollectionModel<UserRepresentation> getSubscribers(String targetChannelUsername);
     ChannelRepresentation goLive(String targetChannelUsername);
-    public Channel getChannelDataForLive(String targetChannelUsername);
+    ChannelRepresentation goOffline(String targetChannelUsername);
+    public Channel goLiveWithChannelOutput(String targetChannelUsername);
+    public Channel goOfflineWithChannelOutput(String targetChannelUsername);
 }
