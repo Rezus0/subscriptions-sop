@@ -64,6 +64,7 @@ public class ChannelServiceImpl implements ChannelService {
         return null;
     }
 
+    @Override
     public List<User> getSubscribersWithUsersOutput(String targetChannelUsername) {
         Optional<Channel> optionalChannel = channelRepository.findByOwnerUsername(targetChannelUsername);
         if (optionalChannel.isEmpty())

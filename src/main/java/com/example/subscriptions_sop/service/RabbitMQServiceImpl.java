@@ -13,7 +13,7 @@ import java.util.List;
 public class RabbitMQServiceImpl implements RabbitMQService {
 
     private RabbitTemplate rabbitTemplate;
-    private ChannelServiceImpl channelService;
+    private ChannelService channelService;
 
     @Value("${rabbitmq.exchange.golive.name}")
     private String exchangeName;
@@ -40,7 +40,7 @@ public class RabbitMQServiceImpl implements RabbitMQService {
     }
 
     @Autowired
-    public void setChannelService(ChannelServiceImpl channelService) {
+    public void setChannelService(ChannelService channelService) {
         this.channelService = channelService;
     }
 }
