@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.sop_grpc_client";
+option java_outer_classname = "SubscriptionProtos";
+option optimize_for = SPEED;
+
+import "google/protobuf/empty.proto";
+package subscription;
+
+service SubscriptionService {
+  rpc Subscribe (SubscribeRequest) returns (SubscriptionResponse) {}
+  rpc ExtendSubscription (ExtendSubscriptionRequest) returns (SubscriptionResponse) {}
+  rpc CancelSubscription (CancelSubscriptionRequest) returns (SubscriptionResponse) {}
+}
+
+message SubscribeRequest {
+  string subscriber_username = 1;
+  string target_channel_username = 2;
+  int32 tier = 3;
+  int32 duration_in_months = 4;
+}
+
+message ExtendSubscriptionRequest {
+  string subscriber_username = 1;
+  string target_channel_username = 2;
+  int32 duration_in_months = 3;
+}
+
+message CancelSubscriptionRequest {
+  string subscriber_username = 1;
+  string target_channel_username = 2;
+}
+
+message SubscriptionGrpc {
+  string subscriber_username = 1;
+  string target_channel_username = 2;
+  enum SubscriptionTier {
+    DEFAULT = 0;
+    VIP = 1;
+    DELUXE = 2;
+  }
+  bool isActive = 3;
+  SubscriptionTier tier = 4;
+  string subscription_start_time = 5;
+  string subscription_end_time = 6;
+  double price = 7;
+}
+
+message SubscriptionResponse {
+  SubscriptionGrpc subscription = 1;
+}
