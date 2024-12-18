@@ -10,6 +10,12 @@ public class SubExtendDto {
     private String targetChannelUsername;
     private int durationInMonths;
 
+    public SubExtendDto(String subscriberUsername, String targetChannelUsername, int durationInMonths) {
+        this.subscriberUsername = subscriberUsername;
+        this.targetChannelUsername = targetChannelUsername;
+        this.durationInMonths = durationInMonths;
+    }
+
     @NotBlank(message = "Subscriber's username can't be blank")
     public String getSubscriberUsername() {
         return subscriberUsername;

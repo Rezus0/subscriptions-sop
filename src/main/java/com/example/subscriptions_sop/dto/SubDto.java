@@ -8,6 +8,13 @@ public class SubDto {
     private int tier;
     private int durationInMonths;
 
+    public SubDto(String subscriberUsername, String targetChannelUsername, int tier, int durationInMonths) {
+        this.subscriberUsername = subscriberUsername;
+        this.targetChannelUsername = targetChannelUsername;
+        this.tier = tier;
+        this.durationInMonths = durationInMonths;
+    }
+
     @NotBlank(message = "Subscriber's username can't be blank")
     public String getSubscriberUsername() {
         return subscriberUsername;

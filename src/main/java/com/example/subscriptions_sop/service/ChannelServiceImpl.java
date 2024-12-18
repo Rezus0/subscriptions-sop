@@ -4,6 +4,7 @@ import com.example.subscriptions_sop.controller.ChannelController;
 import com.example.subscriptions_sop.controller.SubscriptionController;
 import com.example.subscriptions_sop.controller.UserController;
 import com.example.subscriptions_sop.dto.ChannelUpdateDto;
+import com.example.subscriptions_sop.exceptions.UserAlreadyOnlineException;
 import com.example.subscriptions_sop.exceptions.UserNotFoundException;
 import com.example.subscriptions_sop.model.Channel;
 import com.example.subscriptions_sop.model.User;
@@ -96,6 +97,8 @@ public class ChannelServiceImpl implements ChannelService {
         Channel channel = optionalChannel.get();
         if (!channel.isOnline())
             channel.setOnline(true);
+        else
+            throw new UserAlreadyOnlineException("Channel already online");
         return channelRepository.saveAndFlush(channel);
     }
 
